@@ -41,8 +41,8 @@ import matplotlib.pyplot as plt
 
 # Define aonde serão criados o arquivo excel e a pasta contendo todos os gráficos.
 path_script = os.path.abspath(__file__) # Do jeito que está, eles serão criados na pasta acima de onde est'a o script
-path_excel = os.path.dirname(str(Path(path_script).parents[0]))
-path_figuras = os.path.dirname(str(Path(path_script).parents[0]))
+path_excel = os.path.dirname(path_script)
+path_figuras = os.path.dirname(path_script)
 
 ##################################################################################### LEITURA DOS DADOS
 
