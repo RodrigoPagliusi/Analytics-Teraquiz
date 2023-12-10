@@ -1,4 +1,4 @@
-################################################################################### INSTALA AS BIBLIOTECAS
+##################################################################################### INSTALA AS BIBLIOTECAS
 
 import os
 import subprocess
@@ -28,6 +28,7 @@ print('Tudo instalado!...\n')
 
 import json
 import requests
+from pathlib import Path
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import xlsxwriter
@@ -39,17 +40,30 @@ import pprint as pp
 import matplotlib.pyplot as plt
 
 # Define aonde serão criados o arquivo excel e a pasta contendo todos os gráficos.
-path_script = os.path.abspath(__file__) # Do jeito que está, eles serão criados na mesma pasta em que está este programa
-path_excel = os.path.dirname(path_script)
-path_figuras = os.path.dirname(path_script)
-
-print('Lendo os dados...')
+path_script = os.path.abspath(__file__) # Do jeito que está, eles serão criados na pasta acima de onde est'a o script
+path_excel = os.path.dirname(str(Path(path_script).parents[0]))
+path_figuras = os.path.dirname(str(Path(path_script).parents[0]))
 
 ##################################################################################### LEITURA DOS DADOS
 
+print('Lendo os dados...')
 # Lê o arquivo com os dados em formato json e coloca eles como um dicionário em uma variável
 with open('response.json','r', encoding='utf_8') as data_json: data_original = json.load(data_json)
 print('Os dados foram lidos com sucesso...')
+
+###### Script used to hide sensitive information
+# areas_nomes_teraquiz = ['reumateraquiz','oncoteraquiz','radioteraquiz']
+
+# for user_num in data_original:
+#     for area_nome in areas_nomes_teraquiz:
+#         user_num[area_nome]['user']['email'] = '@gmail.com'
+#         user_num[area_nome]['user']['password'] = 'password'
+#         user_num[area_nome]['user']['firstName'] = 'userfirstname'
+#         user_num[area_nome]['user']['lastName'] = 'userlastname'
+#         user_num[area_nome]['user']['phone'] = '(99)99999-9999'
+
+# with open('response.json', "w") as jsonFile:
+#     json.dump(data_original, jsonFile)
 
 ##################################################################################### DEFINE OS NOMES DE CADA VARIÁVEL DOS DADOS E OS PADRÕES DE FORMATAÇÃO
 
@@ -125,7 +139,7 @@ cores_mais_claras = {
 titulos_areas = ['Onco','Reumato','Radio','Teraquiz']
 
 ### Informações para mudanças futuras
-# Incluir hermato e uro e Dermato 
+# Incluir hermato e uro e Dermato
 # Radio - Entrada +4
 # Onco - Entrada +3
 # Reuma - Entrada+2
@@ -274,7 +288,7 @@ for num_data_ori in range(len(data_original)):
         ## Data em que o usuário entrou no app
         elif dados_usuarios_originais[num_usuario] == tratar_datas[2]:
             if registro_original[nomes_areas[-2] + nomes_areas[-1]][chave_user][dados_usuarios_originais[num_usuario]] == "0001-01-01T00:00:00Z": dict_usuario[str_user_info][dados_usuarios_novos[num_usuario]] = nao_informado
-            elif "." in registro_original[nomes_areas[-2] + nomes_areas[-1]][chave_user][dados_usuarios_originais[num_usuario]]: 
+            elif "." in registro_original[nomes_areas[-2] + nomes_areas[-1]][chave_user][dados_usuarios_originais[num_usuario]]:
                 dict_usuario[str_user_info][dados_usuarios_novos[num_usuario]] = parser.isoparse(registro_original[nomes_areas[-2] + nomes_areas[-1]][chave_user][dados_usuarios_originais[num_usuario]].split(".")[0] + "Z").replace(tzinfo=None)
             else: dict_usuario[str_user_info][dados_usuarios_novos[num_usuario]] = parser.isoparse(registro_original[nomes_areas[-2] + nomes_areas[-1]][chave_user][dados_usuarios_originais[num_usuario]]).replace(tzinfo=None)
 
@@ -345,7 +359,7 @@ for area in nomes_areas:
         if data_formatado[user][str_user_info][dados_reais_renom_reordenados["confirmedAt"]] == 'N.I.': # Se não houver a dados_graficos de criação da conta do usuário, não tem fazer os cálculos abaixo
             globals()['media_tempo_mes_' + area + nome_adicional].append(data_formatado[user][str_user_info][dados_reais_renom_reordenados["confirmedAt"]])
             globals()['media_tempo_semana_' + area + nome_adicional].append(data_formatado[user][str_user_info][dados_reais_renom_reordenados["confirmedAt"]])
-        else: 
+        else:
             meses_criacao_conta = relativedelta(datetime.now(),data_formatado[user][str_user_info][dados_reais_renom_reordenados["confirmedAt"]]).months + 1
             globals()['media_tempo_mes_' + area + nome_adicional].append(round(data_formatado[user][area + nome_adicional][dados_originais_areas[0]]/meses_criacao_conta,0))
             semanas_criacao_conta = relativedelta(datetime.now(),data_formatado[user][str_user_info][dados_reais_renom_reordenados["confirmedAt"]]).weeks + 1
@@ -379,7 +393,7 @@ for area in nomes_areas:
     # Agregações de todos os dados de tempo de todas de cada área
     for dado in dados_originais_areas[:-1]:
         globals()['para_calculos_' + dado + '_' + area + nome_adicional] = list(filter(lambda x: x > tempo_ativo, globals()[dado + '_' + area + nome_adicional]))
-        if len(globals()['para_calculos_' + dado + '_' + area + nome_adicional]) == 0: 
+        if len(globals()['para_calculos_' + dado + '_' + area + nome_adicional]) == 0:
             globals()['soma_' + dado + '_' + area + nome_adicional] = 0
             globals()['media_' + dado + '_' + area + nome_adicional] = 0
             globals()['mediana_' + dado + '_' + area + nome_adicional] = 0
@@ -446,7 +460,7 @@ def produzir_graficos(tipo_grafico, # Tipo de gráfico a ser criado
     if tipo_grafico == 'bar': # Gráfico de barras verticais
 
         plt.bar(rotulos_dados, dados_graficos, color = areas[area], width = espessura_barra)
-    
+
         for i in range(len(rotulos_dados)):
             if porcent == True: rotulos = str(round(dados_graficos[i]*100,3)) + '%' # Verifica se é para aparecer o símbolo de % nos rótulos
             else: rotulos = str(dados_graficos[i])
