@@ -40,7 +40,7 @@ import pprint as pp
 import matplotlib.pyplot as plt
 
 # Define aonde serão criados o arquivo excel e a pasta contendo todos os gráficos.
-path_script = os.path.abspath(__file__) # Do jeito que está, eles serão criados na pasta acima de onde est'a o script
+path_script = os.path.abspath(__file__) # Do jeito que está, eles serão criados na mesma pasta em que está este programa
 path_excel = os.path.dirname(path_script)
 path_figuras = os.path.dirname(path_script)
 
@@ -121,6 +121,8 @@ dados_areas = {
 # Nome de cada área com a sua respectiva cor
 # Ao introzudir novas áreas, colocar elas acima
 areas = {
+    "uro":"#BDCE00",
+    "hemato":"#C80000",
     "onco":"#3FB1E5",
     "reuma":"#00EB80",
     "radio":"#FF7F32",
@@ -129,6 +131,8 @@ areas = {
 
 # Cores secundárias de cada área
 cores_mais_claras = {
+    "uro":"#EFEF22",
+    "hemato":"#EA2222",
     "onco":"#7FF5F9",
     "reuma":"#AAFFE3",
     "radio":"#FFBF76",
@@ -136,7 +140,7 @@ cores_mais_claras = {
     }
 
 # Como os nomes das áreas aparecerão nos gráficos
-titulos_areas = ['Onco','Reumato','Radio','Teraquiz']
+titulos_areas = ['Uro','Hemato','Onco','Reumato','Radio','Teraquiz']
 
 ### Informações para mudanças futuras
 # Incluir hermato e uro e Dermato
@@ -233,7 +237,7 @@ data_formatado = []
 # Loop nos dados originais
 for num_data_ori in range(len(data_original)):
 
-    if num_data_ori < 2: continue
+    if num_data_ori < 1: continue
 
     registro_original = data_original[num_data_ori]
 
@@ -413,7 +417,8 @@ for area in nomes_areas:
     globals()['numero_tempo_especialidade_' + area + nome_adicional] = dict(Counter(globals()['tempo_especialidade' + '_' + area + nome_adicional]))
     if area != nomes_areas[-1]: globals()['numero_tempo_especialidade_' + area + nome_adicional].pop('Not_In_Area')
     for especiali in especialidades:
-        globals()['porcent_' + especiali + '_tempo_especialidade' + '_' + area + nome_adicional] = round(Counter(globals()['tempo_especialidade' + '_' + area + nome_adicional])[especiali] / sum(list(globals()['numero_tempo_especialidade_' + area + nome_adicional].values())),2)
+        if not bool(globals()['numero_tempo_especialidade_' + area + nome_adicional]): globals()['porcent_' + especiali + '_tempo_especialidade' + '_' + area + nome_adicional] = 0
+        else: globals()['porcent_' + especiali + '_tempo_especialidade' + '_' + area + nome_adicional] = round(Counter(globals()['tempo_especialidade' + '_' + area + nome_adicional])[especiali] / sum(list(globals()['numero_tempo_especialidade_' + area + nome_adicional].values())),2)
 
     # Calcula o tempo de uso total por regiã
     globals()['tempo_total_regiao_' + area + nome_adicional] = {}
@@ -613,7 +618,9 @@ for area in nomes_areas:
     ordenar_dict = dict(sorted(globals()['numero_usuarios_regiao_' + area + nome_adicional].items(), key=lambda item: item[1]))
     rotulos_plot = list(ordenar_dict.keys())
     dados_plot = list(ordenar_dict.values())
-    produzir_graficos('h_bar','Número de Usuários por Estado e Não Informado', 'numero_usuarios_estado_ni', 16, len(rotulos_plot)*0.40, dados_plot, rotulos_plot,
+    if len(rotulos_plot) ==0: width_graph = 4
+    else: width_graph = len(rotulos_plot)*0.40
+    produzir_graficos('h_bar','Número de Usuários por Estado e Não Informado', 'numero_usuarios_estado_ni', 16, width_graph, dados_plot, rotulos_plot,
                       espessura_barra = 0.8, y_rotulos=rotulos_plot, rotulos_inteiros = True)
 
 
@@ -622,7 +629,9 @@ for area in nomes_areas:
     fora_ni = {key: value for key, value in ordenar_dict.items() if key != 'N.I.'}
     rotulos_plot = list(fora_ni.keys())
     dados_plot = list(fora_ni.values())
-    produzir_graficos('h_bar','Número de Usuários por Estado', 'numero_usuarios_estado', 16, len(rotulos_plot)*0.40, dados_plot, rotulos_plot,
+    if len(rotulos_plot) ==0: width_graph = 4
+    else: width_graph = len(rotulos_plot)*0.40
+    produzir_graficos('h_bar','Número de Usuários por Estado', 'numero_usuarios_estado', 16, width_graph, dados_plot, rotulos_plot,
                       espessura_barra = 0.8, y_rotulos=rotulos_plot, rotulos_inteiros = True)
 
 
@@ -633,7 +642,9 @@ for area in nomes_areas:
         fora_brasil = {key: value for key, value in fora_ni.items() if len(key) > 2}
         rotulos_plot = list(fora_brasil.keys())
         dados_plot = list(fora_brasil.values())
-        produzir_graficos('h_bar','Número de Usuários Fora do Brasil', 'numero_usuarios_estrangeiros', 16, len(rotulos_plot)*0.40, dados_plot, rotulos_plot,
+        if len(rotulos_plot) ==0: width_graph = 4
+        else: width_graph = len(rotulos_plot)*0.40
+        produzir_graficos('h_bar','Número de Usuários Fora do Brasil', 'numero_usuarios_estrangeiros', 16, width_graph*0.40, dados_plot, rotulos_plot,
                           espessura_barra = 0.8, y_rotulos=rotulos_plot, rotulos_inteiros = True)
 
 
@@ -644,7 +655,9 @@ for area in nomes_areas:
     auxiliar = list(ordenar_dict.values())
     auxiliar = np.round(np.array(auxiliar) / divisao_horas,1)
     dados_plot = auxiliar.tolist()
-    produzir_graficos('h_bar','Tempo Total por Estado', 'tempo_total_estado_ni', 6, len(rotulos_plot)*0.4, dados_plot, rotulos_plot,
+    if len(rotulos_plot) ==0: width_graph = 4
+    else: width_graph = len(rotulos_plot)*0.40
+    produzir_graficos('h_bar','Tempo Total por Estado', 'tempo_total_estado_ni', 6, width_graph*0.4, dados_plot, rotulos_plot,
                       espessura_barra = 0.8, y_rotulos=rotulos_plot, unidade_tempo = '(em horas)')
 
 
@@ -656,7 +669,9 @@ for area in nomes_areas:
     auxiliar = list(fora_ni.values())
     auxiliar = np.round(np.array(auxiliar) / divisao_horas,1)
     dados_plot = auxiliar.tolist()
-    produzir_graficos('h_bar','Tempo Total por Estado', 'tempo_total_estado', 6, len(rotulos_plot)*0.4, dados_plot, rotulos_plot,
+    if len(rotulos_plot) ==0: width_graph = 4
+    else: width_graph = len(rotulos_plot)*0.40
+    produzir_graficos('h_bar','Tempo Total por Estado', 'tempo_total_estado', 6, width_graph*0.4, dados_plot, rotulos_plot,
                       espessura_barra = 0.8, y_rotulos=rotulos_plot, unidade_tempo = '(em horas)')
 
 
@@ -669,7 +684,9 @@ for area in nomes_areas:
     auxiliar = em_horas.tolist()
     dados_plot = list(filter(lambda x: x > tempo_horas, auxiliar))
     rotulos_plot  = [str(i) for i in range(1, len(dados_plot) + 1)]
-    produzir_graficos('h_bar','Média de Tempo Mensal dos Usuários Mais Ativos', 'media_tempo_total_mes', 8, len(rotulos_plot)*0.35 + 3, dados_plot, rotulos_plot,
+    if len(rotulos_plot) ==0: width_graph = 4
+    else: width_graph = len(rotulos_plot)*0.35
+    produzir_graficos('h_bar','Média de Tempo Mensal dos Usuários Mais Ativos', 'media_tempo_total_mes', 8, width_graph*0.35 + 3, dados_plot, rotulos_plot,
                       espessura_barra = 0.6, unidade_tempo = '(em horas)')
 
 
@@ -708,11 +725,15 @@ for area in nomes_areas:
     # Mais e menos 5 minutos Usuários Ativos
     rotulos_plot = ['Mais de ' + str(5) + ' minutos','Menos de ' + str(5) + ' minutos']
     filtro_ativos = [valor for valor, ativo in zip(globals()[dados_originais_areas[0] + '_' + area + nome_adicional], globals()[dados_originais_areas[-1] + '_' + area + nome_adicional]) if ativo == True]
-    tamanho_lista = len(filtro_ativos)
-    acima_ = list(filter(lambda x: x >= 300, filtro_ativos))
-    abaixo_ = list(filter(lambda x: x < 300, filtro_ativos))
-    dados_plot = [round(len(acima_)/tamanho_lista,3), round(len(abaixo_)/tamanho_lista,3)]
-    produzir_graficos('pie','Porcentagens Usuários Ativos', 'porcent_usuarios_ativos', 9, 12, dados_plot, rotulos_plot)
+    if len(filtro_ativos) > 0:
+        tamanho_lista = len(filtro_ativos)
+        acima_ = list(filter(lambda x: x >= 300, filtro_ativos))
+        abaixo_ = list(filter(lambda x: x < 300, filtro_ativos))
+        dados_plot = [round(len(acima_)/tamanho_lista,3), round(len(abaixo_)/tamanho_lista,3)]
+        produzir_graficos('pie','Porcentagens Usuários Ativos', 'porcent_usuarios_ativos', 9, 12, dados_plot, rotulos_plot)
+    else:
+        rotulos_plot = ['Mais de ' + str(5) + ' minutos','Menos de ' + str(5) + ' minutos']
+        produzir_graficos('pie','Não há usuários ativos nessa área', 'porcent_usuarios_ativos', 9, 12, [1,1], rotulos_plot)
 
 
 print('Os gráficos foram criados com sucesso.')
